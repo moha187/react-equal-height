@@ -53,9 +53,8 @@ const EqualHeight = memo((props: Props) => {
     useEffect(() => {
         let resizeTimer: number;
         let orientationChangeTimer: number;
-        const browser: boolean = typeof window !== "undefined" && typeof window.document !== "undefined";
-
-        if (browser) {
+        const browser: boolean = !window || !window.document;
+        if (!browser) {
             window.addEventListener('resize', timeout ? () => {
                 clearTimeout(resizeTimer);
                 resizeTimer = window.setTimeout(handleUpdate, timeout);
