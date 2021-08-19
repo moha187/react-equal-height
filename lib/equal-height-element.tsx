@@ -45,6 +45,9 @@ const EqualHeightElement = memo((props: Props) => {
 
     // Calculate method
     const getHeight = () => {
+        if(typeof window === 'undefined' || typeof window.document === 'undefined') {
+            return;
+        }
         if (!innerElement.current || disable) {return;}
         const tempHeight: string = innerElement.current.style.getPropertyValue('height');
         innerElement.current.style.removeProperty('height');
@@ -58,6 +61,9 @@ const EqualHeightElement = memo((props: Props) => {
         });
 
         if (!disable) {
+            if(typeof window === 'undefined' || typeof window.document === 'undefined') {
+                return;
+            }
             setChildrenCount(value => value + 1);
         }
     };
