@@ -33,99 +33,113 @@ export const defaults = {
 };
 
 const EqualHeight = memo((props: Props) => {
-    const {
-        children,
-        timeout = defaults.timeout,
-        animationSpeed = defaults.animationSpeed
-    } = props;
+        const {
+            children,
+            timeout = defaults.timeout,
+            animationSpeed = defaults.animationSpeed
+        } = props;
 
-    // States
-    const [sizes, setSizes] = useState<StatesProps["sizes"]>(defaults.sizes);
-    const [temporarySizes, setTemporarySizes] = useState<StatesProps["sizes"]>(defaults.temporarySizes);
-    const [update, setUpdate] = useState<StatesProps["update"]>(defaults.update);
-    const [forceUpdate, setForceUpdate] = useState<StatesProps["forceUpdate"]>(defaults.forceUpdate);
-    const [originalChildrenCount, setOriginalChildrenCount] = useState<StatesProps["originalChildrenCount"]>(defaults.originalChildrenCount);
-    const [childrenCount, setChildrenCount] = useState<StatesProps["childrenCount"]>(defaults.childrenCount);
+        // States
+        const [sizes, setSizes] = useState<StatesProps["sizes"]>(defaults.sizes);
+        const [temporarySizes, setTemporarySizes] = useState<StatesProps["sizes"]>(defaults.temporarySizes);
+        const [update, setUpdate] = useState<StatesProps["update"]>(defaults.update);
+        const [forceUpdate, setForceUpdate] = useState<StatesProps["forceUpdate"]>(defaults.forceUpdate);
+        const [originalChildrenCount, setOriginalChildrenCount] = useState<StatesProps["originalChildrenCount"]>(defaults.originalChildrenCount);
+        const [childrenCount, setChildrenCount] = useState<StatesProps["childrenCount"]>(defaults.childrenCount);
 
-    const handleUpdate = useCallback(() => setUpdate(value => !value), []);
+        const handleUpdate = useCallback(() => setUpdate(value => !value), []);
 
-    // Observe [resize, orientationchange] event
-    useEffect(() => {
-        let resizeTimer: number;
-        let orientationChangeTimer: number;
-        const browser: boolean = !window || !window.document;
-        if (!browser) {
-            window.addEventListener('resize', timeout ? () => {
-                clearTimeout(resizeTimer);
-                resizeTimer = window.setTimeout(handleUpdate, timeout);
-            } : handleUpdate);
+        // Observe [resize, orientationchange] event
+        useEffect(() => {
+            if(typeof window === 'undefined' || typeof window.document === 'undefined') {
+                return;
+            }
+            let resizeTimer: number;
+            let orientationChangeTimer: number;
+            const browser: boolean = !window || !window.document;
+            if (!browser) {
+                window.addEventListener('resize', timeout ? () => {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = window.setTimeout(handleUpdate, timeout);
+                } : handleUpdate);
 
-            window.addEventListener('orientationchange', timeout ? () => {
-                clearTimeout(orientationChangeTimer);
-                orientationChangeTimer = window.setTimeout(handleUpdate, timeout);
-            } : handleUpdate);
+                window.addEventListener('orientationchange', timeout ? () => {
+                    clearTimeout(orientationChangeTimer);
+                    orientationChangeTimer = window.setTimeout(handleUpdate, timeout);
+                } : handleUpdate);
 
-            return () => {
-                window.removeEventListener('resize', handleUpdate);
-                window.removeEventListener('orientationchange', handleUpdate);
-            };
-        }
-    }, []);
+                return () => {
+                    window.removeEventListener('resize', handleUpdate);
+                    window.removeEventListener('orientationchange', handleUpdate);
+                };
+            }
+        }, []);
 
-    // Force calculate heights
-    // Force calculate height when children count changed
-    useMemo(() => {
-        handleUpdate();
-    }, [forceUpdate, originalChildrenCount]);
+        // Force calculate heights
+        // Force calculate height when children count changed
+        useMemo(() => {
+            if(typeof window === 'undefined' || typeof window.document === 'undefined') {
+                return;
+            }
+            handleUpdate();
+        }, [forceUpdate, originalChildrenCount]);
 
-    // Choose only highest heights when all children calculated
-    // Set right sizes
-    // Reset temp values
-    useMemo(() => {
-        // statement (<= instead ===) in case when new children will be add
-        if (originalChildrenCount <= childrenCount) {
-            let filteredSizes: SizesProps[] = [];
-            temporarySizes.map((filteredSize) => {
-                const name = filteredSize.name;
-                const height = filteredSize.height;
-                const elementIndex: number = filteredSizes.findIndex((e) => e.name === name);
-                if (elementIndex > -1) {
-                    const savedHeight: number = filteredSizes[elementIndex].height;
-                    if (savedHeight < height) {
-                        filteredSizes[elementIndex].height = height;
+        // Choose only highest heights when all children calculated
+        // Set right sizes
+        // Reset temp values
+        useMemo(() => {
+            if(typeof window === 'undefined' || typeof window.document === 'undefined') {
+                return;
+            }
+            // statement (<= instead ===) in case when new children will be add
+            if (originalChildrenCount <= childrenCount) {
+                let filteredSizes: SizesProps[] = [];
+                temporarySizes.map((filteredSize) => {
+                    const name = filteredSize.name;
+                    const height = filteredSize.height;
+                    const elementIndex: number = filteredSizes.findIndex((e) => e.name === name);
+                    if (elementIndex > -1) {
+                        const savedHeight: number = filteredSizes[elementIndex].height;
+                        if (savedHeight < height) {
+                            filteredSizes[elementIndex].height = height;
+                        }
+                    } else {
+                        filteredSizes = [...filteredSizes, {
+                            name,
+                            height
+                        }]
                     }
-                } else {
-                    filteredSizes = [...filteredSizes, {
-                        name,
-                        height
-                    }]
-                }
-            });
-            setSizes(filteredSizes);
+                });
+                setSizes(filteredSizes);
 
-            // Reset
-            setTemporarySizes([]);
-            setChildrenCount(0);
-        }
-    }, [childrenCount]);
+                // Reset
+                setTemporarySizes([]);
+                setChildrenCount(0);
+            }
+        }, [childrenCount]);
 
-    return (
-        <EqualHeightProvider value={{
-            sizes,
-            temporarySizes,
-            update,
-            animationSpeed,
-            forceUpdate,
-            originalChildrenCount,
-            childrenCount,
-            setTemporarySizes,
-            setOriginalChildrenCount,
-            setChildrenCount,
-            setForceUpdate
-        }}>
-            {children}
-        </EqualHeightProvider>
-    );
+       if(typeof window === 'undefined' || typeof window.document === 'undefined'){
+           return (<></>);
+       }else{
+        return (
+            <EqualHeightProvider value={{
+                sizes,
+                temporarySizes,
+                update,
+                animationSpeed,
+                forceUpdate,
+                originalChildrenCount,
+                childrenCount,
+                setTemporarySizes,
+                setOriginalChildrenCount,
+                setChildrenCount,
+                setForceUpdate
+            }}>
+                {children}
+            </EqualHeightProvider>
+        );
+    }
+
 });
 
 export default EqualHeight;

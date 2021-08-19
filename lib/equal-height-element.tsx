@@ -64,6 +64,9 @@ const EqualHeightElement = memo((props: Props) => {
 
     // Init
     useEffect(() => {
+        if(typeof window === 'undefined' || typeof window.document === 'undefined') {
+            return;
+        }
         if (disable) {return;}
 
         // Report self to parent component (to calculate how many components exist)
@@ -75,6 +78,9 @@ const EqualHeightElement = memo((props: Props) => {
 
     // Call calculate method
     useEffect((): void => {
+        if(typeof window === 'undefined' || typeof window.document === 'undefined') {
+            return;
+        }
         if (disable) {return;}
 
         getHeight();
@@ -82,6 +88,9 @@ const EqualHeightElement = memo((props: Props) => {
 
     // Set sizes on elements in DOM
     useMemo((): void => {
+        if(typeof window === 'undefined' || typeof window.document === 'undefined') {
+            return;
+        }
         if (disable) {return;}
 
         const elementIndex: number = sizes.findIndex((e) => e.name === name);
