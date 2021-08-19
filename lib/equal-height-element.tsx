@@ -109,20 +109,23 @@ const EqualHeightElement = memo((props: Props) => {
     if (!placeholder && !children) {
         return null;
     }
-
-    return (
-        <>
-            {disable ? (
-                children
-            ) : (
-                React.createElement(tag, {
-                    ref: innerElement,
-                    className: styles.wrapper,
-                    style: inlineStyles
-                }, !placeholder && children)
-            )}
-        </>
-    );
+    if(typeof window === 'undefined' || typeof window.document === 'undefined'){
+        return (<></>);
+    }else {
+        return (
+            <>
+                {disable ? (
+                    children
+                ) : (
+                    React.createElement(tag, {
+                        ref: innerElement,
+                        className: styles.wrapper,
+                        style: inlineStyles
+                    }, !placeholder && children)
+                )}
+            </>
+        );
+    }
 });
 
 export default EqualHeightElement;
